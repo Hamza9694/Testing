@@ -1,0 +1,27 @@
+name: Deploy with AWX
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Trigger AWX Job
+      env:
+        AWX_HOST: ${{ secrets.AWX_HOST }}
+        AWX_TOKEN: ${{ secrets.AWX_TOKEN }}
+        AWX_PROJECT: ${{ secrets.AWX_PROJECT }}
+        AWX_JOB_TEMPLATE_ID: ${{ secrets.AWX_JOB_TEMPLATE_ID }}
+      run: |
+        curl -k -X POST \
+          -H "Authorization: Bearer $AWX_TOKEN" \
+          -H "Content-Type: application/json" \
+          -d '{"extra_vars": {}}' \
+          "$AWX_HOST/api/v2/job_templates/$AWX_JOB_TEMPLATE_ID/launch/"
